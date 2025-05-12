@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function LoginButton() {
   const { data: session } = useSession();
@@ -18,21 +19,21 @@ export default function LoginButton() {
         />
         <span className="text-sm font-medium mr-4">{session.user?.name}</span>
 
-        <a
+        <Link
           href="/api/auth/signout"
           className="text-sm font-medium hover:text-gray-300 transition-colors"
         >
           Logout
-        </a>
+        </Link>
       </div>
     );
   }
   return (
-    <a
+    <Link
       href="/api/auth/signin"
       className="text-sm font-medium hover:text-gray-300 transition-colors"
     >
       Login
-    </a>
+    </Link>
   );
 }
