@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+
+  meta              Json         @default("{}")
+  collections       Collection[]
+  attempts          Attempt[]
+  accounts          Account[]
+  sessions          Session[]
+  quizzes           Quiz[]
+  joinedCollections Collection[] @relation("CollectionUsers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Collection {
+  id          String         @id @default(cuid())
+  name        String
+  description String         @default("")
+  ownerId     String
+  owner       User           @relation(fields: [ownerId], references: [id])
+  banks       QuestionBank[]
+  quizzes     Quiz[]
+  shared      Boolean        @default(false)
+  users       User[]         @relation("CollectionUsers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuestionBank {
+  id           String     @id @default(cuid())
+  name         String
+  description  String     @default("")
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  questions    Question[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum QuestionType {
+  MCQ
+  Numerical
+  Subjective
+}
+
+model Question {
+  id      String       @id @default(cuid())
+  type    QuestionType
+  text    String
+  meta    Json         @default("{}")
+  answer  String
+  chapter String
+  subject String
+  grade   String
+  marks   Int
+  image   String?
+  bankId  String
+  bank    QuestionBank @relation(fields: [bankId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Quiz {
+  id           String     @id @default(cuid())
+  name         String
+  description  String     @default("")
+  createdById  String
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  questionIds  String[] // store question order
+  attempts     Attempt[]
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attempt {
+  id      String @id @default(cuid())
+  quizId  String
+  userId  String
+  answers Json
+  quiz    Quiz   @relation(fields: [quizId], references: [id])
+  user    User   @relation(fields: [userId], references: [id])
+
+  inProgress Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

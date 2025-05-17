@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Work_Sans, Comfortaa } from "next/font/google";
 import "./globals.css";
 import SessionWrapper from "@/components/SessionWrapper";
+import NavBar from "@/components/NavBar";
 
 const workSans = Work_Sans({
   variable: "--font-work-sans",
@@ -16,7 +17,7 @@ const comfortaa = Comfortaa({
 export const metadata: Metadata = {
   title: "boqs | Quizzes for everyone",
   description: "boqs is a platform for quizzes",
-  icons: "boqs.png",
+  icons: "qlogo.png",
 };
 
 export default function RootLayout({
@@ -29,7 +30,15 @@ export default function RootLayout({
       <body
         className={`${workSans.variable} ${comfortaa.variable} antialiased`}
       >
-        <SessionWrapper>{children}</SessionWrapper>
+        <SessionWrapper>
+          <main
+            className="relative min-h-screen"
+            style={{ fontFamily: "Work Sans" }}
+          >
+            <NavBar />
+            <div className="pt-4 max-w-5xl mx-auto px-4">{children}</div>
+          </main>
+        </SessionWrapper>
       </body>
     </html>
   );
